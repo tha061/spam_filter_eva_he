@@ -18,6 +18,7 @@ with poly:
 poly.set_output_ranges(20)
 poly.set_input_scales(20)
 
+
 compiler = CKKSCompiler()
 poly, params, signature = compiler.compile(poly)
 
