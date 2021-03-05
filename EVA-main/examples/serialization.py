@@ -9,7 +9,7 @@ import numpy as np
 
 #################################################
 print('Compile time')
-
+print("The function: y  3x^2 + 5x - 2")
 poly = EvaProgram('Polynomial', vec_size=8)
 with poly:
     x = Input('x')
