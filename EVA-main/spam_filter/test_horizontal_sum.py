@@ -1,5 +1,5 @@
 # import unittest
-from common import *
+# from common import *
 from eva import EvaProgram, Input, Output
 from eva.std.numeric import horizontal_sum
 
