@@ -34,4 +34,4 @@ def test_horizontal_sum(self):
 
 
 if __name__ == '__main__':
-    test_horizontal_sum(None)
+    test_horizontal_sum(self)
