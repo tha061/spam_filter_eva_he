@@ -59,6 +59,7 @@ public_ctx = load('poly.sealpublic')
 encInputs = load('poly_inputs.sealvals')
 
 encOutputs = public_ctx.execute(poly, encInputs)
+print("encOutputs = {}".format(encOutputs))
 
 save(encOutputs, 'poly_outputs.sealvals')
 
@@ -68,9 +69,13 @@ print('Back on client')
 secret_ctx = load('poly.sealsecret')
 encOutputs = load('poly_outputs.sealvals')
 
+print("now decrypt the results: ")
 outputs = secret_ctx.decrypt(encOutputs, signature)
 
+print("outputs = {}".format(outputs))
+
 reference = evaluate(poly, inputs)
+print("refernce compute the function poly on plaintext: ")
 print('Expected', reference)
 print('Got', outputs)
 print('MSE', valuation_mse(outputs, reference))
