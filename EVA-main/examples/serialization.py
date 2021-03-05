@@ -44,7 +44,10 @@ public_ctx = load('poly.sealpublic')
 inputs = {
     'x': [i for i in range(signature.vec_size)]
 }
+print("inputs = {}".format(inputs))
 encInputs = public_ctx.encrypt(inputs, signature)
+
+print("encInputs = {}".format(encInputs))
 
 save(encInputs, 'poly_inputs.sealvals')
 
