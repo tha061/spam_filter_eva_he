@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-from eva import EvaProgram, Input, Output, evaluate, save, load
+from eva import EvaProgram, Input, Output, evaluate, save, load, mul
 from eva.ckks import CKKSCompiler
 from eva.seal import generate_keys
 from eva.metric import valuation_mse
@@ -129,7 +129,8 @@ def mul_encrypted_vectors(vector_size):
     public_ctx = load('enc_vec.sealpublic')
 
     inputs = {
-        'x': [i for i in range(signature.vec_size)]
+        'x': [i for i in range(signature.vec_size)],
+        'y': [2*i for i in range(signature.vec_size)]
     }
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
@@ -157,7 +158,8 @@ def mul_encrypted_vectors(vector_size):
     encInputs = load('enc_vec_inputs.sealvals')
     encInputs_y = load('enc_vec_inputs_y.sealvals')
 
-    encOutputs = public_ctx.execute(enc_vec, encInputs, encInputs_y)
+    encOutputs = public_ctx.mul(enc_vec, encInputs, encInputs_y)
+    # public_ctx.mul(encOutputs, encInputs, encInputs_y)
     print("encOutputs = {}".format(encOutputs))
 
     save(encOutputs, 'enc_vec_outputs.sealvals')
@@ -181,9 +183,38 @@ def mul_encrypted_vectors(vector_size):
 
     return outputs, reference
 
+def assert_compiles_and_matches_reference(self, prog, inputs = None, config={}):
+        if inputs == None:
+            inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)]
+                for name in prog.inputs }
+        config['warn_vec_size'] = 'false'
 
+        print('inputs = ', inputs)
+        reference = evaluate(prog, inputs)
+
+        compiler = CKKSCompiler(config = config)
+        compiled_prog, params, signature = compiler.compile(prog)
+
+        reference_compiled = evaluate(compiled_prog, inputs)
+        ref_mse = valuation_mse(reference, reference_compiled)
+        self.assertTrue(ref_mse < 0.0000000001,
+            f"Mean squared error was {ref_mse}")
+
+        public_ctx, secret_ctx = generate_keys(params)
+        encInputs = public_ctx.encrypt(inputs, signature)
+        encOutputs = public_ctx.execute(compiled_prog, encInputs)
+        outputs = secret_ctx.decrypt(encOutputs, signature)
+
+        print('outputs = ', outputs)
+        print('reference = ', reference)
+
+        he_mse = valuation_mse(outputs, reference)
+        self.assertTrue(he_mse < 0.01, f"Mean squared error was {he_mse}")
+
+        return (compiled_prog, params, signature)
 
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 16)
-    mul_encrypted_vectors(8)
+    # mul_encrypted_vectors(8)
+    assert_compiles_and_matches_reference()
 
