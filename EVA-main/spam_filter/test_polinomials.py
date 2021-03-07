@@ -8,14 +8,14 @@ from eva.metric import valuation_mse
 import numpy as np
 
 #################################################
-def polinomal_function(a,b,c, vector_size):
+def polynomial_function(a,b,c, vector_size):
     print('Compile time')
     # print("The function: y = 3x^2 + 5x - 2")
     poly = EvaProgram('Polynomial', vec_size=vector_size)
     # a = 10
     # b = 40
     # c = 5
-    print("The polinomial function: y = {}x^2 + {}x - {}; vector_size = {}".format(a,b,c, vector_size))
+    print("The polynomial function: y = {}x^2 + {}x - {}; vector_size = {}".format(a,b,c, vector_size))
     with poly:
         x = Input('x')
         Output('y', a*x**2 + b*x - c)
@@ -88,5 +88,102 @@ def polinomal_function(a,b,c, vector_size):
 
     return outputs, reference
 
+def mul_encrypted_vectors(x=None, y=None, ector_size):
+    print('Compile time')
+    # print("The function: y = 3x^2 + 5x - 2")
+    enc_vec = EvaProgram('encrypt_vector', vec_size=vector_size)
+    # a = 10
+    # b = 40
+    # c = 5
+    # print("The polynomial function: y = {}x^2 + {}x - {}; vector_size = {}".format(a,b,c, vector_size))
+    with enc_vec:
+        x = Input('x')
+        y = Input('y')
+        Output('res', x*y)
+
+    enc_vec.set_output_ranges(20)
+    enc_vec.set_input_scales(20)
+
+
+    compiler = CKKSCompiler()
+    enc_vec, params, signature = compiler.compile(enc_vec)
+
+    save(enc_vec, 'enc_vec.eva')
+    save(params, 'enc_vecly.evaparams')
+    save(signature, 'enc_vec.evasignature')
+
+    #################################################
+    print('Key generation time')
+
+    params = load('enc_vec.evaparams')
+
+    public_ctx, secret_ctx = generate_keys(params)
+
+    save(public_ctx, 'enc_vec.sealpublic')
+    save(secret_ctx, 'enc_vec.sealsecret')
+
+    #################################################
+    print('Runtime on client')
+
+    signature = load('enc_vec.evasignature')
+    public_ctx = load('enc_vec.sealpublic')
+
+    inputs = {
+        'x': [i for i in range(signature.vec_size)]
+        'y': [2*i for i in range(signature.vec_size)]
+    }
+    print("inputs = {}".format(inputs))
+    encInputs = public_ctx.encrypt(inputs, signature)
+
+    print("encInputs = {}".format(encInputs))
+
+    save(encInputs, 'enc_vec_inputs.sealvals')
+    
+    # ##### y
+    # inputs_y = {
+    #     'y': [2*i for i in range(signature.vec_size)]
+    # }
+    # print("inputs_y = {}".format(inputs_y))
+    # encInputs_y = public_ctx.encrypt(inputs_y, signature)
+
+    # print("encInputs_y = {}".format(encInputs_y))
+
+    # save(encInputs_y, 'enc_vec_inputs_y.sealvals')
+
+    #################################################
+    print('Runtime on server')
+
+    enc_vec = load('enc_vec.eva')
+    public_ctx = load('enc_vec.sealpublic')
+    encInputs = load('enc_vec_inputs.sealvals')
+
+    encOutputs = public_ctx.execute(enc_vec, encInputs)
+    print("encOutputs = {}".format(encOutputs))
+
+    save(encOutputs, 'enc_vec_outputs.sealvals')
+
+    #################################################
+    print('Back on client')
+
+    secret_ctx = load('enc_vec.sealsecret')
+    encOutputs = load('enc_vec_outputs.sealvals')
+
+    print("now decrypt the results: ")
+    outputs = secret_ctx.decrypt(encOutputs, signature)
+
+    print("outputs = {}".format(outputs))
+
+    reference = evaluate(enc_vec, inputs)
+    print("refernce compute the function poly on plaintext: ")
+    print('Expected', reference)
+    # print('Got', outputs)
+    print('MSE', valuation_mse(outputs, reference))
+
+    return outputs, reference
+
+
+
 if __name__ == '__main__':
-    polinomal_function(10, 40, 5, 16)
+    # polynomial_function(10, 40, 5, 16)
+    mul_encrypted_vectors(None,None,8)
+
