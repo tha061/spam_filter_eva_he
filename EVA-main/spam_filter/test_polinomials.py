@@ -1,11 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-from eva import EvaProgram, Input, Output, evaluate, save, load, mul
+from eva import EvaProgram, Input, Output, evaluate, save, load
 from eva.ckks import CKKSCompiler
 from eva.seal import generate_keys
 from eva.metric import valuation_mse
 import numpy as np
+from random import uniform
 
 #################################################
 def polynomial_function(a,b,c, vector_size):
@@ -216,5 +217,5 @@ def assert_compiles_and_matches_reference(self, prog, inputs = None, config={}):
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 16)
     # mul_encrypted_vectors(8)
-    assert_compiles_and_matches_reference()
+    assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
 
