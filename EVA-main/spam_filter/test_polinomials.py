@@ -89,4 +89,4 @@ def polinomal_function(a,b,c, vector_size):
     return outputs, reference
 
 if __name__ == '__main__':
-    polinomal_function(10,40,5, 8)
+    polinomal_function(10, 40, 5, 128)
