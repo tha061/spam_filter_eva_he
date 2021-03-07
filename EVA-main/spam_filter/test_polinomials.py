@@ -8,14 +8,14 @@ from eva.metric import valuation_mse
 import numpy as np
 
 #################################################
-def polinomal_function(a,b,c):
+def polinomal_function(a,b,c, vector_size):
     print('Compile time')
     # print("The function: y = 3x^2 + 5x - 2")
-    poly = EvaProgram('Polynomial', vec_size=8)
+    poly = EvaProgram('Polynomial', vec_size=vector_size)
     # a = 10
     # b = 40
     # c = 5
-    print("The polinomial function: y = {}x^2 + {}x - {}".format(a,b,c))
+    print("The polinomial function: y = {}x^2 + {}x - {}; vector_size = {}".format(a,b,c, vector_size))
     with poly:
         x = Input('x')
         Output('y', a*x**2 + b*x - c)
