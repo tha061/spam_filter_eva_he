@@ -109,7 +109,7 @@ def mul_encrypted_vectors(vector_size):
     enc_vec, params, signature = compiler.compile(enc_vec)
 
     save(enc_vec, 'enc_vec.eva')
-    save(params, 'enc_vecly.evaparams')
+    save(params, 'enc_vec.evaparams')
     save(signature, 'enc_vec.evasignature')
 
     #################################################
