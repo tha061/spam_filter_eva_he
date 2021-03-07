@@ -88,7 +88,7 @@ def polynomial_function(a,b,c, vector_size):
 
     return outputs, reference
 
-def mul_encrypted_vectors(x=None, y=None, ector_size):
+def mul_encrypted_vectors(vector_size):
     print('Compile time')
     # print("The function: y = 3x^2 + 5x - 2")
     enc_vec = EvaProgram('encrypt_vector', vec_size=vector_size)
@@ -185,5 +185,5 @@ def mul_encrypted_vectors(x=None, y=None, ector_size):
 
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 16)
-    mul_encrypted_vectors(None,None,8)
+    mul_encrypted_vectors(8)
 
