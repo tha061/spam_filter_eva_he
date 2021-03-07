@@ -14,7 +14,7 @@ poly = EvaProgram('Polynomial', vec_size=8)
 a = 10
 b = 40
 c = 5
-print("The polinomial function: y = {}x^2 + {}x - {}".format(1,b,c))
+print("The polinomial function: y = {}x^2 + {}x - {}".format(a,b,c))
 with poly:
     x = Input('x')
     Output('y', a*x**2 + b*x - c)
