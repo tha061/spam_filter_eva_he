@@ -9,14 +9,15 @@ import numpy as np
 
 #################################################
 print('Compile time')
-print("The function: y = 3x^2 + 5x - 2")
+# print("The function: y = 3x^2 + 5x - 2")
 poly = EvaProgram('Polynomial', vec_size=8)
 a = 10
 b = 40
-c = -5
+c = 5
+print("The polinomial function: y = {}x^2 + {}x - {}".format(1,b,c))
 with poly:
     x = Input('x')
-    Output('y', a*x**2 + b*x + c)
+    Output('y', a*x**2 + b*x - c)
 
 poly.set_output_ranges(20)
 poly.set_input_scales(20)
