@@ -217,5 +217,5 @@ def assert_compiles_and_matches_reference(self, prog, inputs = None, config={}):
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 16)
     # mul_encrypted_vectors(8)
-    assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
+    # assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
 
