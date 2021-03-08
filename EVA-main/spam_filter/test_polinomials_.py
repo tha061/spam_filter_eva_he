@@ -49,7 +49,7 @@ def polynomial_function(a,b,c, vector_size):
     public_ctx = load('poly.sealpublic')
 
     inputs = {
-        'x': [i for i in range(signature.vec_size)]
+        'x': [1 for i in range(signature.vec_size)]
     }
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
@@ -215,7 +215,11 @@ def assert_compiles_and_matches_reference(self, prog, inputs = None, config={}):
         return (compiled_prog, params, signature)
 
 if __name__ == '__main__':
-    # polynomial_function(10, 40, 5, 16)
+    polynomial_function(10, 40, 5, 2048)
     # mul_encrypted_vectors(8)
+<<<<<<< HEAD
     # assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
+=======
+    #assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
+>>>>>>> 881780dca1793e243a8a2ac1f60f00773f23dc3d
 
