@@ -7,6 +7,11 @@ from eva.seal import generate_keys
 from eva.metric import valuation_mse
 import numpy as np
 from random import uniform
+import unittest
+import tempfile
+import os
+from common import *
+from eva import EvaProgram, Input, Output, save, load
 
 #################################################
 def polynomial_function(a,b,c, vector_size):
@@ -92,130 +97,103 @@ def polynomial_function(a,b,c, vector_size):
 def mul_encrypted_vectors(vector_size):
     print('Compile time')
     # print("The function: y = 3x^2 + 5x - 2")
-    enc_vec = EvaProgram('encrypt_vector', vec_size=vector_size)
+    mul_vec = EvaProgram('mul_encrypt_vectors', vec_size=vector_size)
     # a = 10
     # b = 40
     # c = 5
     # print("The polynomial function: y = {}x^2 + {}x - {}; vector_size = {}".format(a,b,c, vector_size))
-    with enc_vec:
-        x = Input('x')
-        y = Input('y')
-        Output('res', x*y)
 
-    enc_vec.set_output_ranges(20)
-    enc_vec.set_input_scales(20)
+    # prog = EvaProgram('ReductionTree', vec_size=16384)
+    with mul_vec:
+        x1 = Input('x1')
+        x2 = Input('x2')
+        Output('y', (x1*2))
 
+    mul_vec.set_output_ranges(20)
+    mul_vec.set_input_scales(60)
 
     compiler = CKKSCompiler()
-    enc_vec, params, signature = compiler.compile(enc_vec)
+    mul_vec, params, signature = compiler.compile(mul_vec)
 
-    save(enc_vec, 'enc_vec.eva')
-    save(params, 'enc_vec.evaparams')
-    save(signature, 'enc_vec.evasignature')
+    save(mul_vec, 'mul_vec.eva')
+    save(params, 'mul_vec.evaparams')
+    save(signature, 'mul_vec.evasignature')
 
     #################################################
     print('Key generation time')
 
-    params = load('enc_vec.evaparams')
+    params = load('mul_vec.evaparams')
 
     public_ctx, secret_ctx = generate_keys(params)
 
-    save(public_ctx, 'enc_vec.sealpublic')
-    save(secret_ctx, 'enc_vec.sealsecret')
+    save(public_ctx, 'mul_vec.sealpublic')
+    save(secret_ctx, 'mul_vec.sealsecret')
 
     #################################################
     print('Runtime on client')
 
-    signature = load('enc_vec.evasignature')
-    public_ctx = load('enc_vec.sealpublic')
+    signature = load('mul_vec.evasignature')
+    public_ctx = load('mul_vec.sealpublic')
 
     inputs = {
-        'x': [i for i in range(signature.vec_size)],
-        'y': [2*i for i in range(signature.vec_size)]
+        'x1': [i for i in range(signature.vec_size)]
     }
+
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
 
     print("encInputs = {}".format(encInputs))
 
-    save(encInputs, 'enc_vec_inputs.sealvals')
+    save(encInputs, 'mul_vec_inputs.sealvals')
     
-    # ##### y
-    inputs_y = {
-        'y': [2*i for i in range(signature.vec_size)]
-    }
-    print("inputs_y = {}".format(inputs_y))
-    encInputs_y = public_ctx.encrypt(inputs_y, signature)
-
-    print("encInputs_y = {}".format(encInputs_y))
-
-    save(encInputs_y, 'enc_vec_inputs_y.sealvals')
+    # # ##### y
+    # inputs_y = {
+    #     'y': [2*i for i in range(signature.vec_size)]
+    # }
+    # print("inputs_y = {}".format(inputs_y))
+    # encInputs_y = public_ctx.encrypt(inputs_y, signature)
+    #
+    # print("encInputs_y = {}".format(encInputs_y))
+    #
+    # save(encInputs_y, 'enc_vec_inputs_y.sealvals')
 
     #################################################
     print('Runtime on server')
 
-    enc_vec = load('enc_vec.eva')
-    public_ctx = load('enc_vec.sealpublic')
-    encInputs = load('enc_vec_inputs.sealvals')
-    encInputs_y = load('enc_vec_inputs_y.sealvals')
+    mul_vec = load('mul_vec.eva')
+    public_ctx = load('mul_vec.sealpublic')
+    encInputs = load('mul_vec_inputs.sealvals')
+    # encInputs_y = load('mul_vec_inputs_y.sealvals')
 
-    encOutputs = public_ctx.mul(enc_vec, encInputs, encInputs_y)
+    encOutputs = public_ctx.execute(mul_vec, encInputs)
     # public_ctx.mul(encOutputs, encInputs, encInputs_y)
     print("encOutputs = {}".format(encOutputs))
 
-    save(encOutputs, 'enc_vec_outputs.sealvals')
+    save(encOutputs, 'mul_vec_outputs.sealvals')
 
     #################################################
     print('Back on client')
 
-    secret_ctx = load('enc_vec.sealsecret')
-    encOutputs = load('enc_vec_outputs.sealvals')
+    secret_ctx = load('mul_vec.sealsecret')
+    encOutputs = load('mul_vec_outputs.sealvals')
 
     print("now decrypt the results: ")
     outputs = secret_ctx.decrypt(encOutputs, signature)
 
     print("outputs = {}".format(outputs))
 
-    reference = evaluate(enc_vec, inputs)
-    print("refernce compute the function poly on plaintext: ")
+    reference = evaluate(mul_vec, inputs)
+    print("reference computing the function poly on plaintext: ")
     print('Expected', reference)
     # print('Got', outputs)
     print('MSE', valuation_mse(outputs, reference))
 
     return outputs, reference
 
-def assert_compiles_and_matches_reference(self, prog, inputs = None, config={}):
-        if inputs == None:
-            inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)]
-                for name in prog.inputs }
-        config['warn_vec_size'] = 'false'
 
-        print('inputs = ', inputs)
-        reference = evaluate(prog, inputs)
 
-        compiler = CKKSCompiler(config = config)
-        compiled_prog, params, signature = compiler.compile(prog)
-
-        reference_compiled = evaluate(compiled_prog, inputs)
-        ref_mse = valuation_mse(reference, reference_compiled)
-        self.assertTrue(ref_mse < 0.0000000001,
-            f"Mean squared error was {ref_mse}")
-
-        public_ctx, secret_ctx = generate_keys(params)
-        encInputs = public_ctx.encrypt(inputs, signature)
-        encOutputs = public_ctx.execute(compiled_prog, encInputs)
-        outputs = secret_ctx.decrypt(encOutputs, signature)
-
-        print('outputs = ', outputs)
-        print('reference = ', reference)
-
-        he_mse = valuation_mse(outputs, reference)
-        self.assertTrue(he_mse < 0.01, f"Mean squared error was {he_mse}")
-
-        return (compiled_prog, params, signature)
 
 if __name__ == '__main__':
-    polynomial_function(10, 40, 5, 2048)
-    # mul_encrypted_vectors(8)
-    #assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
+    # polynomial_function(10, 40, 5, 1024)
+    mul_encrypted_vectors(8)
 

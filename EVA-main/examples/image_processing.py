@@ -62,6 +62,9 @@ with sobel:
 sobel.set_input_scales(25)
 sobel.set_output_ranges(10)
 
+
+
+
 harris = EvaProgram('harris', vec_size=h*w)
 with harris:
     image = Input('image')
