@@ -138,7 +138,7 @@ def mul_encrypted_vectors(vector_size):
     #     'x1': [i for i in range(signature.vec_size)]
     # }
 
-    inputs = {'x': [1,2,3,4,5,6,7,8], 'x2': [1,2,3,4,5,6,7,8]}
+    inputs = {'x1': [1,2,3,4,5,6,7,8], 'x2': [1,2,3,4,5,6,7,8]}
 
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
@@ -147,16 +147,7 @@ def mul_encrypted_vectors(vector_size):
 
     save(encInputs, 'mul_vec_inputs.sealvals')
     
-    # # ##### y
-    # inputs_y = {
-    #     'y': [2*i for i in range(signature.vec_size)]
-    # }
-    # print("inputs_y = {}".format(inputs_y))
-    # encInputs_y = public_ctx.encrypt(inputs_y, signature)
-    #
-    # print("encInputs_y = {}".format(encInputs_y))
-    #
-    # save(encInputs_y, 'enc_vec_inputs_y.sealvals')
+   
 
     #################################################
     print('Runtime on server')
@@ -164,10 +155,10 @@ def mul_encrypted_vectors(vector_size):
     mul_vec = load('mul_vec.eva')
     public_ctx = load('mul_vec.sealpublic')
     encInputs = load('mul_vec_inputs.sealvals')
-    # encInputs_y = load('mul_vec_inputs_y.sealvals')
+    
 
     encOutputs = public_ctx.execute(mul_vec, encInputs)
-    # public_ctx.mul(encOutputs, encInputs, encInputs_y)
+    
     print("encOutputs = {}".format(encOutputs))
 
     save(encOutputs, 'mul_vec_outputs.sealvals')
