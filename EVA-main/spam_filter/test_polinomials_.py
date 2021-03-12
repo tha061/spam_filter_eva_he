@@ -273,5 +273,5 @@ def scalar_mul(vec_size):
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 1024)
     mul_encrypted_vectors(8)
-    # scalar_mul(4)
+    scalar_mul(4)
 
