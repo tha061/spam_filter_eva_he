@@ -282,13 +282,5 @@ def scalar_mul(vec_size):
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 1024)
     # mul_encrypted_vectors(8)
-<<<<<<< HEAD:EVA-main/spam_filter/test_polinomials.py
     scalar_mul(4)
-=======
-<<<<<<< HEAD
-    # assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
-=======
-    #assert_compiles_and_matches_reference(self, prog, inputs = None, config={})
->>>>>>> 881780dca1793e243a8a2ac1f60f00773f23dc3d
 
->>>>>>> 4e67403eb457cf11889ce1c518c481387ff7f637:EVA-main/spam_filter/test_polinomials_.py
