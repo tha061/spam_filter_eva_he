@@ -53,9 +53,8 @@ def polynomial_function(a,b,c, vector_size):
     signature = load('poly.evasignature')
     public_ctx = load('poly.sealpublic')
 
-    inputs = {
-        'x': [1 for i in range(signature.vec_size)]
-    }
+    # inputs = {'x': [1 for i in range(signature.vec_size)], 'y' = [1]}
+    inputs = {'x': [1], 'y': [1]}
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
 
@@ -107,7 +106,7 @@ def mul_encrypted_vectors(vector_size):
     with mul_vec:
         x1 = Input('x1')
         x2 = Input('x2')
-        Output('y', (x1*2))
+        Output('y', (x1*x2))
 
     mul_vec.set_output_ranges(20)
     mul_vec.set_input_scales(60)
@@ -135,9 +134,11 @@ def mul_encrypted_vectors(vector_size):
     signature = load('mul_vec.evasignature')
     public_ctx = load('mul_vec.sealpublic')
 
-    inputs = {
-        'x1': [i for i in range(signature.vec_size)]
-    }
+    # inputs = {
+    #     'x1': [i for i in range(signature.vec_size)]
+    # }
+
+    inputs = {'x': [1,2,3,4,5,6,7,8], 'x2': [1,2,3,4,5,6,7,8]}
 
     print("inputs = {}".format(inputs))
     encInputs = public_ctx.encrypt(inputs, signature)
@@ -190,10 +191,95 @@ def mul_encrypted_vectors(vector_size):
 
     return outputs, reference
 
+def scalar_mul(vec_size):
+    prog = EvaProgram('AddMult', vec_size=vec_size)
+    with prog:
+        x1 = Input('x1')
+        x2 = Input('x2')
+        x3 = Input('x3')
+        y1 = Input('y1')
+        y2 = Input('y2')
+        y3 = Input('y3')
+        # Output('sum', x + y)
+        Output('multiplication', x1*y1 + x2*y2 + x3*y3)
 
+    prog.set_output_ranges(20)
+    prog.set_input_scales(60)
 
+    compiler = CKKSCompiler()
+    prog, params, signature = compiler.compile(prog)
+
+    save(prog, 'prog.eva')
+    save(params, 'prog.evaparams')
+    save(signature, 'prog.evasignature')
+
+    #################################################
+    print('Key generation time')
+
+    params = load('prog.evaparams')
+
+    public_ctx, secret_ctx = generate_keys(params)
+
+    save(public_ctx, 'prog.sealpublic')
+    save(secret_ctx, 'prog.sealsecret')
+
+    #################################################
+    print('Runtime on client')
+
+    signature = load('prog.evasignature')
+    public_ctx = load('prog.sealpublic')
+
+    # inputs = {
+    #     'x1': [i for i in range(signature.vec_size)]
+    # }
+
+    # inputs = {'x': [i for i in range(signature.vec_size)], 'y': [1 for i in range(signature.vec_size)]}
+    inputs = {'x1': [1, 0, 1, 0], 'x2': [2, 0, 2, 0], 'x3':[3, 0, 3, 0], 'y1': [1, 0, 1, 0], 'y2': [1, 0, 1, 0], 'y3': [1, 0, 1, 0]}
+
+    print("inputs = {}".format(inputs))
+    encInputs = public_ctx.encrypt(inputs, signature)
+
+    print("encInputs = {}".format(encInputs))
+
+    save(encInputs, 'prog_inputs.sealvals')
+
+    print('Runtime on server')
+
+    prog = load('prog.eva')
+    public_ctx = load('prog.sealpublic')
+    encInputs = load('prog_inputs.sealvals')
+    # encInputs_y = load('mul_vec_inputs_y.sealvals')
+
+    encOutputs = public_ctx.execute(prog, encInputs)
+    # public_ctx.mul(encOutputs, encInputs, encInputs_y)
+    print("encOutputs = {}".format(encOutputs))
+
+    save(encOutputs, 'prog_outputs.sealvals')
+
+    #################################################
+    print('Back on client')
+
+    secret_ctx = load('prog.sealsecret')
+    encOutputs = load('prog_outputs.sealvals')
+    # resEnc = load('resEnc.sealvals')
+
+    print("now decrypt the results: ")
+    outputs = secret_ctx.decrypt(encOutputs, signature)
+
+    print("outputs = {}".format(outputs))
+
+    # res = secret_ctx.decrypt(resEnc, signature)
+    # print('res = ', res)
+
+    reference = evaluate(prog, inputs)
+    print("reference computing the function poly on plaintext: ")
+    print('Expected', reference)
+    # print('Got', outputs)
+    print('MSE', valuation_mse(outputs, reference))
+
+    return outputs, reference
 
 if __name__ == '__main__':
     # polynomial_function(10, 40, 5, 1024)
-    mul_encrypted_vectors(8)
-
+    # mul_encrypted_vectors(8)
+    scalar_mul(4)
