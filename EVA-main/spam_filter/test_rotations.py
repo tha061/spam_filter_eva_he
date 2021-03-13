@@ -66,12 +66,17 @@ def test_rotations():
 
                     assert_compiles_and_matches_reference(prog,config={'warn_vec_size':'false'})
 
-def rotOp(x,r):
+def rotOp_left(x,r):
     # lambda x, r: x << r
     return x << r
 
-def test_rotations_simple(rot):
+def rotOp_right(x,r):
+    # lambda x, r: x << r
+    return x >> r
+
+def test_rotations_simple(rot, rotOp_function):
     rot = rot
+    rotOp = rotOp_function
     prog = EvaProgram('RotOp', vec_size = 8)
     with prog:
         x = Input('x')
@@ -115,8 +120,10 @@ def test_rotations_simple(rot):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--rot', type=int, help='rotation')
+    parser.add_argument('--func', type=str, help='left or right')
     args = parser.parse_args()
     rot = args.rot
+    rotOpfunc = args.func
 
-    test_rotations_simple(rot)
+    test_rotations_simple(rot, rotOpfunc)
     # test_rotations()
