@@ -18,13 +18,18 @@ def assert_compiles_and_matches_reference(prog, inputs = None, config={}):
                 for name in prog.inputs }
         config['warn_vec_size'] = 'false'
 
+        print("inputs = ", inputs)
         reference = evaluate(prog, inputs)
 
         compiler = CKKSCompiler(config = config)
         compiled_prog, params, signature = compiler.compile(prog)
 
         reference_compiled = evaluate(compiled_prog, inputs)
+
+        print("reference_compiled = ", reference_compiled)
         ref_mse = valuation_mse(reference, reference_compiled)
+
+        print("ref_mse = ", ref_mse)
         # assertTrue(ref_mse < 0.0000000001,
             # f"Mean squared error was {ref_mse}")
 
@@ -33,7 +38,10 @@ def assert_compiles_and_matches_reference(prog, inputs = None, config={}):
         encOutputs = public_ctx.execute(compiled_prog, encInputs)
         outputs = secret_ctx.decrypt(encOutputs, signature)
 
+        print("outputs = ", outputs)
+
         he_mse = valuation_mse(outputs, reference)
+        print("he_mse = ", he_mse)
         # assertTrue(he_mse < 0.01, f"Mean squared error was {he_mse}")
 
         return (compiled_prog, params, signature)
