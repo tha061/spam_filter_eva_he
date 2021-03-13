@@ -62,6 +62,49 @@ def test_rotations():
 
                     assert_compiles_and_matches_reference(prog,config={'warn_vec_size':'false'})
 
+def rotOp(x,r):
+    lambda x, r: x << r
+    return x
+
+def test_rotations_simple(rot):
+    rot = rot
+    prog = EvaProgram('RotOp', vec_size = 8)
+    with prog:
+        x = Input('x')
+        Output('y', rotOp(x,rot))
+
+    prog.set_output_ranges(20)
+    prog.set_input_scales(30)
+
+    compiler = CKKSCompiler()
+    compiled_prog, params, signature = compiler.compile(prog)
+
+    
+
+    public_ctx, secret_ctx = generate_keys(params)
+
+
+    inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)] for name in prog.inputs }
+    print("inputs = ", inputs)
+    reference = evaluate(prog, inputs)
+
+    reference_compiled = evaluate(compiled_prog, inputs)
+
+    ref_mse = valuation_mse(reference, reference_compiled)
+
+    print("ref_mse = ", ref_mse)
+
+    encInputs = public_ctx.encrypt(inputs, signature)
+    encOutputs = public_ctx.execute(compiled_prog, encInputs)
+    outputs = secret_ctx.decrypt(encOutputs, signature)
+
+    print("outputs = ", outputs)
+
+    he_mse = valuation_mse(outputs, reference)
+    print("he_mse = ", he_mse)
+
+    return outputs, reference
+
 
 if __name__ == '__main__':
-    test_rotations()
+    test_rotations_simple(1)
