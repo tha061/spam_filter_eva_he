@@ -75,7 +75,8 @@ def test_rotations_simple(rot):
     prog = EvaProgram('RotOp', vec_size = 8)
     with prog:
         x = Input('x')
-        Output('y', rotOp(x,rot))
+        # Output('y', rotOp(x,rot))
+        Output('y', (lambda x, rot: x << rot))
 
     prog.set_output_ranges(20)
     prog.set_input_scales(30)
