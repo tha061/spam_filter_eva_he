@@ -67,17 +67,16 @@ def test_rotations():
                     assert_compiles_and_matches_reference(prog,config={'warn_vec_size':'false'})
 
 def rotOp(x,r):
-    lambda x, r: x << r
-    return x
+    # lambda x, r: x << r
+    return x << r
 
 def test_rotations_simple(rot):
     rot = rot
     prog = EvaProgram('RotOp', vec_size = 8)
     with prog:
         x = Input('x')
-        # Output('y', rotOp(x,rot))
-        Output('y', (lambda x, rot: x << rot))
-
+        Output('y', rotOp(x,rot))
+    
     prog.set_output_ranges(20)
     prog.set_input_scales(30)
 
