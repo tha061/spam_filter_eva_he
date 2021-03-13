@@ -74,13 +74,12 @@ def rotOp_right(x,r):
     # lambda x, r: x << r
     return x >> r
 
-def test_rotations_simple(rot, rotOp_function):
+def test_rotations_simple(rot):
     rot = rot
-    rotOp = str(rotOp_function)
     prog = EvaProgram('RotOp', vec_size = 8)
     with prog:
         x = Input('x')
-        Output('y', rotOp(x,rot))
+        Output('y', rotOp_right(x,rot))
     
     prog.set_output_ranges(20)
     prog.set_input_scales(30)
@@ -120,10 +119,10 @@ def test_rotations_simple(rot, rotOp_function):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--rot', type=int, help='rotation')
-    parser.add_argument('--func', type=str, help='left or right')
+    # parser.add_argument('--func', type=str, help='left or right')
     args = parser.parse_args()
     rot = args.rot
-    rotOpfunc = args.func
+    # rotOpfunc = args.func
 
-    test_rotations_simple(rot, rotOpfunc)
+    test_rotations_simple(rot)
     # test_rotations()
