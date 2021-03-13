@@ -53,6 +53,7 @@ def test_rotations():
         for rotOp in [lambda x, r: x << r, lambda x, r: x >> r]:
             for enc in [False, True]:
                 for rot in range(-2,2):
+                    print("rot = ", rot)
                     prog = EvaProgram('RotOp', vec_size = 8)
                     with prog:
                         x = Input('x')
@@ -115,5 +116,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     rot = args.rot
 
-    test_rotations_simple(rot)
-
+    # test_rotations_simple(rot)
+    test_rotations()
