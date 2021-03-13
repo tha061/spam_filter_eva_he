@@ -89,6 +89,8 @@ def test_rotations_simple(rot):
     print("inputs = ", inputs)
     reference = evaluate(prog, inputs)
 
+    print("reference = ", reference)
+
     reference_compiled = evaluate(compiled_prog, inputs)
 
     ref_mse = valuation_mse(reference, reference_compiled)
