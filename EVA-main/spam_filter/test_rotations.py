@@ -76,7 +76,7 @@ def rotOp_right(x,r):
 
 def test_rotations_simple(rot, rotOp_function):
     rot = rot
-    rotOp = rotOp_function
+    rotOp = str(rotOp_function)
     prog = EvaProgram('RotOp', vec_size = 8)
     with prog:
         x = Input('x')
