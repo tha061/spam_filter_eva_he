@@ -15,7 +15,9 @@ import argparse, sys
 
 def assert_compiles_and_matches_reference(prog, inputs = None, config={}):
         if inputs == None:
-            inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)]
+            # inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)]
+            #     for name in prog.inputs }
+            inputs = { name: [_ for _ in range(prog.vec_size)]
                 for name in prog.inputs }
         config['warn_vec_size'] = 'false'
 
