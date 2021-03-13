@@ -67,7 +67,7 @@ def test_rotations():
                     assert_compiles_and_matches_reference(prog,config={'warn_vec_size':'false'})
 
 def rotOp(x,r):
-    lambda x, r: x >> r
+    lambda x, r: x << r
     return x
 
 def test_rotations_simple(rot):
@@ -118,5 +118,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     rot = args.rot
 
-    # test_rotations_simple(rot)
-    test_rotations()
+    test_rotations_simple(rot)
+    # test_rotations()
