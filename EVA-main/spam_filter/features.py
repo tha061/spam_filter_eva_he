@@ -217,4 +217,5 @@ class Features(EvaTestCase):
         self.assertTrue(valuation_mse(outputs, reference) < 0.01)
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    test_rotations()
