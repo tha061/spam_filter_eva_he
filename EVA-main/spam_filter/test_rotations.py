@@ -84,7 +84,7 @@ def test_rotations_simple(rot):
     public_ctx, secret_ctx = generate_keys(params)
 
 
-    inputs = { name: [uniform(-2,2) for _ in range(prog.vec_size)] for name in prog.inputs }
+    inputs = { name: [i for i in range(prog.vec_size)] for name in prog.inputs }
     print("inputs = ", inputs)
     reference = evaluate(prog, inputs)
 
