@@ -10,6 +10,7 @@ import tempfile
 import os
 from common import *
 from eva import EvaProgram, Input, Output, save, load
+import argparse, sys
 
 
 def assert_compiles_and_matches_reference(prog, inputs = None, config={}):
@@ -107,4 +108,10 @@ def test_rotations_simple(rot):
 
 
 if __name__ == '__main__':
-    test_rotations_simple(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rot', type=int, help='rotation')
+    args = parser.parse_args()
+    rot = args.rot
+
+    test_rotations_simple(rot)
+
